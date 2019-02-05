@@ -1,0 +1,3 @@
+[submodule "postgres-mock"]
+	path = postgres-mock
+	url = git@github.com:pedro823/postgres-mock.git
