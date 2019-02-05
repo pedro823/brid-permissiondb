@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
+using PermissionDB.Connectors;
 
 namespace PermissionDB
 {
@@ -11,20 +12,25 @@ namespace PermissionDB
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IDatabaseConnector, DatabaseConnector>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            // Remember to use PGPASSFILE
+            var postgresDbConnectionArgs = "INSERT PRODUCTION VALUES HERE";
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                postgresDbConnectionArgs = "Host=localhost;Port=5432;Username=permissiondb;password=bridbrid;";
             }
 
-            app.Run(async (context) =>
-            {
-                await context.Response.WriteAsync("Hello World!");
-            });
+            var postgresDbConnection = new NpgsqlConnection(postgresDbConnectionArgs);
+            postgresDbConnection.Open();
+            DatabaseConnector.Initialize(postgresDbConnection);
+            
+            app.UseMvc();
         }
     }
 }
